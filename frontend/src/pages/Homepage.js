@@ -39,7 +39,7 @@ const Homepage = () => {
         borderWidth="1px"
       >
         <Text fontSize={{ base: "3xl", md: "4xl" }} fontFamily="Work sans">
-          <Center>Quiz Hub</Center>
+          <Center> NITJ QUIZ HUB</Center>
         </Text>
       </Box>
       <Box bg="white" w="100%" p={4} borderRadius="lg" borderWidth="1px">
@@ -68,37 +68,7 @@ const Homepage = () => {
         justify={{ base: "center", md: "space-between" }}
         align={{ base: "center", md: "center" }}
       >
-        <Stack
-          color="white"
-          fontFamily="Work sans"
-          fontWeight="bold"
-          direction={"row"}
-          spacing={6}
-        >
-          <Link href={"https://github.com/Subrata-Rudra"} target="_blank">
-            GitHub
-          </Link>
-          <Link
-            href={"https://www.linkedin.com/in/subrata-rudra-b481741b7/"}
-            target="_blank"
-          >
-            LinkedIn
-          </Link>
-          <Link
-            href={"https://www.facebook.com/subrata.rudra.982/"}
-            target="_blank"
-          >
-            FaceBook
-          </Link>
-        </Stack>
-        <Text
-          color="white"
-          fontFamily="Work sans"
-          fontWeight="bold"
-          fontSize="16px"
-        >
-          Made with ❤️ by Subrata Rudra
-        </Text>
+        
       </Container>
     </Container>
   );
