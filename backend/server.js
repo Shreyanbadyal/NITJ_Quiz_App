@@ -25,7 +25,7 @@ app.use("/user", userRoutes);
 app.use("/quiz", quizRoutes);
 app.use("/performance", performanceRoutes);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4000;
 
 app.listen(port, () => {
   console.log(

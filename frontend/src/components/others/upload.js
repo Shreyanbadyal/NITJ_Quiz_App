@@ -47,7 +47,7 @@ function UploadQuestion() {
         },
       };
       const isSent = await axios.post(
-        "http://localhost:5000/quiz/upload",
+        "http://localhost:4000/quiz/upload",
         dataToSend,
         config
       );

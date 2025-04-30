@@ -53,7 +53,7 @@ const Signup = () => {
       };
 
       const { data } = await axios.post(
-        "http://localhost:5000/user",
+        "http://localhost:4000/user",
         { name, email, isTeacher, password },
         config
       );

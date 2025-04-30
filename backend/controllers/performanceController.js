@@ -5,24 +5,30 @@ const Proficiency = require("../models/proficiencyModel");
 const getPerformance = expressAsyncHandler(async (req, res) => {
   let uid = req.query.uid;
   let lang_id = req.query.lang_id;
+
   try {
     const userHistory = await History.find({
       user_id: uid,
       language_id: lang_id,
     })
-      .select("score_percent accuracy")
+      .select("score_percent accuracy correct_answers total_questions createdAt")
       .sort({ createdAt: 1 });
+
     const performanceArray = userHistory.map((history) => ({
       score_percent: history.score_percent,
       accuracy: history.accuracy,
+      correct_answers: history.correct_answers,
+      total_questions: history.total_questions,
+      date: history.createdAt,
     }));
-    const jsonContent = JSON.stringify(performanceArray);
-    res.status(200).send(jsonContent);
+
+    res.status(200).json(performanceArray);
   } catch (err) {
     res.status(500);
     throw new Error(err);
   }
 });
+
 
 const getLeaderboard = expressAsyncHandler(async (req, res) => {
   let lang_id = req.query.lang_id;

@@ -10,6 +10,8 @@ const historySchema = mongoose.Schema(
     language_id: { type: String, required: true },
     score_percent: { type: Number, required: true },
     accuracy: { type: String, required: true },
+    correct_answers: { type: Number, required: true },         // Add this
+    total_questions: { type: Number, required: true },         // Add this
   },
   { timestamps: true }
 );

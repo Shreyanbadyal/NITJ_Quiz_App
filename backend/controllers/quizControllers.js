@@ -74,23 +74,27 @@ const getAnswers = expressAsyncHandler(async (req, res) => {
   let positiveMarks = 0,
     negativeMarks = 0,
     unAttempted = 0;
+
   const pairs = req.body.pairs;
   let totalMarks = pairs.length;
+
   for (let i = 0; i < pairs.length; i++) {
     const pair = pairs[i];
     let objId = pair.objectId;
     let givenAns = pair.givenAnswer;
+
     try {
       const question = await Question.findById(objId);
       if (question) {
         lang_id = question.language_id;
         level = question.category;
+
         if (givenAns !== "-1" && question.correct_answer === givenAns) {
-          positiveMarks = positiveMarks + 1;
+          positiveMarks++;
         } else if (givenAns !== "-1" && question.correct_answer !== givenAns) {
-          negativeMarks = negativeMarks + 1;
+          negativeMarks++;
         } else {
-          unAttempted = unAttempted + 1;
+          unAttempted++;
         }
       } else {
         console.log("No question found with the provided objectId");
@@ -100,10 +104,12 @@ const getAnswers = expressAsyncHandler(async (req, res) => {
       throw new Error(err);
     }
   }
+
   let accuracy_val = 0;
   if (totalMarks !== unAttempted) {
     accuracy_val = (positiveMarks * 100) / (totalMarks - unAttempted);
   }
+
   const report = {
     totalMarks: totalMarks,
     corrected: positiveMarks,
@@ -114,26 +120,27 @@ const getAnswers = expressAsyncHandler(async (req, res) => {
     scorePercentage: ((positiveMarks - negativeMarks / 2) * 100) / totalMarks,
     accuracy: accuracy_val,
   };
-  const jsonContent = JSON.stringify(report);
-  res.status(200).send(jsonContent);
 
+  res.status(200).json(report); // send report to frontend
+
+  // ✅ Save quiz result to History
   try {
     const newChapter = {
       user_id: uid,
       language_id: lang_id,
-      score_percent: ((positiveMarks - negativeMarks / 2) * 100) / totalMarks,
+      score_percent: report.scorePercentage,
       accuracy: accuracy_val,
+      correct_answers: positiveMarks,      // ✅ ADDED
+      total_questions: totalMarks,         // ✅ ADDED
     };
-    const h = await History.create(newChapter);
+    await History.create(newChapter);
   } catch (err) {
-    res.status(400);
-    throw new Error(err);
+    console.error("Error saving to history:", err);
   }
 
-  const p_level = await Proficiency.findOne({
-    user_id: uid,
-    language_id: lang_id,
-  });
+  // Update or create proficiency level
+  const p_level = await Proficiency.findOne({ user_id: uid, language_id: lang_id });
+
   if (p_level) {
     updateProficiency(uid, lang_id).then();
   } else {
@@ -142,6 +149,7 @@ const getAnswers = expressAsyncHandler(async (req, res) => {
       language_id: lang_id,
       proficiencyLevel: "Apprentice",
     };
+
     try {
       const isCreated = await Proficiency.create(newUserProf);
       if (isCreated) {

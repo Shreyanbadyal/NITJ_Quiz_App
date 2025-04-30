@@ -3,6 +3,7 @@ import {
   Box,
   Text,
   Select,
+  Button,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -10,9 +11,9 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react";
 import axios from "axios";
-import Chart from "react-apexcharts";
 import Navbar from "./navbar";
 
 const PerformanceGraph = () => {
@@ -20,46 +21,10 @@ const PerformanceGraph = () => {
   const [performanceData, setPerformanceData] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [initialRenderLangId, setInitialRenderLangId] = useState(true);
-  const [initialRenderPerformanceData, setInitialRenderPerformanceData] =
-    useState(true);
+  const [selectedAttempt, setSelectedAttempt] = useState(null);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-
-  const [chartScoreData, setChartScoreData] = useState({
-    options: {
-      chart: {
-        id: "line-chart",
-      },
-      xaxis: {
-        categories: [], // X-axis labels
-      },
-      colors: ["#327da8"],
-    },
-    series: [
-      {
-        name: "Score Percent",
-        data: [], // Score Percent values
-      },
-    ],
-  });
-
-  const [chartAccuracyData, setChartAccuracyData] = useState({
-    options: {
-      chart: {
-        id: "line-chart",
-      },
-      xaxis: {
-        categories: [], // X-axis labels
-      },
-      colors: ["#46a832"],
-    },
-    series: [
-      {
-        name: "Accuracy",
-        data: [], // Accuracy values
-      },
-    ],
-  });
 
   const fetchLanguages = async () => {
     try {
@@ -70,7 +35,7 @@ const PerformanceGraph = () => {
         },
       };
       const response = await axios.get(
-        `http://localhost:5000/quiz/languages`,
+        `http://localhost:4000/quiz/languages`,
         config
       );
       setLanguages(response.data);
@@ -88,52 +53,13 @@ const PerformanceGraph = () => {
         },
       };
       const response = await axios.get(
-        `http://localhost:5000/performance?uid=${userInfo._id}&lang_id=${lang_id}`,
+        `http://localhost:4000/performance?uid=${userInfo._id}&lang_id=${lang_id}`,
         config
       );
       setPerformanceData(response.data);
     } catch (error) {
       console.error("Error fetching performance data:", error);
     }
-  };
-  const updateChartScoreData = () => {
-    const categories = performanceData.map((item, index) => String(index + 1));
-    const scorePercentData = performanceData.map((item) => item.score_percent);
-    setChartScoreData({
-      options: {
-        ...chartScoreData.options,
-        xaxis: {
-          ...chartScoreData.options.xaxis,
-          categories: categories,
-        },
-      },
-      series: [
-        {
-          ...chartScoreData.series[0],
-          data: scorePercentData,
-        },
-      ],
-    });
-  };
-
-  const updateChartAccuracyData = () => {
-    const categories = performanceData.map((item, index) => String(index + 1));
-    const accuracyData = performanceData.map((item) => item.accuracy);
-    setChartAccuracyData({
-      options: {
-        ...chartAccuracyData.options,
-        xaxis: {
-          ...chartAccuracyData.options.xaxis,
-          categories: categories,
-        },
-      },
-      series: [
-        {
-          ...chartAccuracyData.series[0],
-          data: accuracyData,
-        },
-      ],
-    });
   };
 
   useEffect(() => {
@@ -142,57 +68,38 @@ const PerformanceGraph = () => {
 
   useEffect(() => {
     if (initialRenderLangId) {
-      // Skip the initial render
       setInitialRenderLangId(false);
       return;
     }
     fetchData();
   }, [lang_id]);
 
-  useEffect(() => {
-    if (initialRenderPerformanceData) {
-      // Skip the initial render
-      setInitialRenderPerformanceData(false);
-      return;
-    }
-    if (performanceData.length > 0) {
-      updateChartScoreData(performanceData);
-      updateChartAccuracyData(performanceData);
-    } else {
-      window.location.reload();
-    }
-  }, [performanceData]);
+  const openModalWithDetails = (attempt) => {
+    setSelectedAttempt(attempt);
+    onOpen();
+  };
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Response Details</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            
-          </ModalBody>
-        </ModalContent>
-      </Modal>
       <Navbar />
       <Box
         p={4}
-        borderWidth="1px"
-        borderRadius="md"
         background="white"
-        textAlign="center"
         width="100vw"
-        display="flex"
-        flexDirection="column"
+        minHeight="100vh"
+        textAlign="center"
       >
-        <Text fontSize="3xl" fontWeight="bold" mb={7} mt={12} pt={5}>
-          Performance Graph
+        <Text fontSize="3xl" fontWeight="bold" my={6}>
+          Test Attempts
         </Text>
+
         <Select
           placeholder="Select Language"
           value={lang_id}
           onChange={(e) => setLangId(e.target.value)}
+          mb={5}
+          width="300px"
+          mx="auto"
         >
           {languages.map((language) => (
             <option key={language} value={language}>
@@ -200,45 +107,65 @@ const PerformanceGraph = () => {
             </option>
           ))}
         </Select>
+
         {performanceData.length > 0 ? (
-          <Box>
-            <Box mt={7}>
-              <Text fontSize="2xl" color="brown" fontWeight="bold">
-                Language: {lang_id.toUpperCase()}
-              </Text>
-              <Box mt={5}>
-                <Text fontSize="2xl" fontWeight="bold" color="blue">
-                  Score Percentage Graph
+          <VStack spacing={5} mt={8}>
+            {performanceData.map((item, index) => (
+              <Box
+                key={index}
+                borderWidth="1px"
+                borderRadius="lg"
+                p={5}
+                width="80%"
+                shadow="md"
+                textAlign="left"
+              >
+                <Text fontSize="lg" fontWeight="bold">
+                  Attempt {index + 1} - {lang_id.toUpperCase()}
                 </Text>
-                <Chart
-                  options={chartScoreData.options}
-                  series={chartScoreData.series}
-                  type="line"
-                  height={250}
-                />
+                <Text>Date: {new Date(item.date).toLocaleString()}</Text>
+                <Button
+                  colorScheme="blue"
+                  mt={3}
+                  onClick={() => openModalWithDetails(item)}
+                >
+                  See Performance
+                </Button>
               </Box>
-            </Box>
-            <Box>
-              <Box mt={10}>
-                <Text fontSize="2xl" fontWeight="bold" color="green">
-                  Accuracy Graph
-                </Text>
-                <Chart
-                  options={chartAccuracyData.options}
-                  series={chartAccuracyData.series}
-                  type="line"
-                  height={250}
-                  color="green"
-                />
-              </Box>
-            </Box>
-          </Box>
+            ))}
+          </VStack>
         ) : (
-          <Box mt={10}>
-            <Text fontSize="xl">No data to show</Text>
-          </Box>
+          <Text mt={10} fontSize="xl">
+            No attempts found.
+          </Text>
         )}
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Performance Details</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            {selectedAttempt && (
+              <Box>
+                <Text><strong>Score %:</strong> {selectedAttempt.score_percent}%</Text>
+                <Text><strong>Accuracy:</strong> {selectedAttempt.accuracy}%</Text>
+                <Text><strong>Correct Answers:</strong> {selectedAttempt.correct_answers}</Text>
+                <Text><strong>Total Questions:</strong> {selectedAttempt.total_questions}</Text>
+                <Text>
+  <strong>Date:</strong>{" "}
+  {selectedAttempt.date
+    ? new Date(selectedAttempt.date).toLocaleDateString()
+    : "Not available"}
+</Text>
+
+
+              </Box>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </>
   );
 };

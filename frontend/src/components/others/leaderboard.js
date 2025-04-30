@@ -29,7 +29,7 @@ const LeaderboardPage = () => {
         },
       };
       const response = await axios.get(
-        `http://localhost:5000/quiz/languages`,
+        `http://localhost:4000/quiz/languages`,
         config
       );
       setLanguages(response.data);
@@ -52,7 +52,7 @@ const LeaderboardPage = () => {
       };
       try {
         const response = await axios.get(
-          `http://localhost:5000/performance/leaderboard?lang_id=${selectedLangId}`,
+          `http://localhost:4000/performance/leaderboard?lang_id=${selectedLangId}`,
           config
         );
         setLeaderboardData(response.data);

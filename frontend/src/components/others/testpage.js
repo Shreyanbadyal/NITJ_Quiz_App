@@ -7,7 +7,6 @@ import {
   RadioGroup,
   Button,
   Container,
-  Select,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -17,15 +16,18 @@ import {
   ModalCloseButton,
   useDisclosure,
   Center,
+  SimpleGrid,
+  Card,
+  CardBody,
+  Heading,
 } from "@chakra-ui/react";
 import axios from "axios";
 import Navbar from "./navbar";
 
 const TestPage = () => {
   const [questions, setQuestions] = useState([]);
-  const [category, setCategory] = useState("");
   const [lang_id, setLangId] = useState("");
-  const [initialRenderQuestions, setInitialRenderQuestions] = useState(true);
+  const [category, setCategory] = useState("");
   const [initialRenderAnswers, setInitialRenderAnswers] = useState(true);
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const [languages, setLanguages] = useState([]);
@@ -34,6 +36,8 @@ const TestPage = () => {
   const [responseDetails, setResponseDetails] = useState({});
   const [shouldShow, setShouldShow] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState({});
+
+  const difficulties = ["easy", "medium", "hard"];
 
   const fetchLanguages = async () => {
     try {
@@ -44,7 +48,7 @@ const TestPage = () => {
         },
       };
       const response = await axios.get(
-        `http://localhost:5000/quiz/languages`,
+        `http://localhost:4000/quiz/languages`,
         config
       );
       setLanguages(response.data);
@@ -53,7 +57,7 @@ const TestPage = () => {
     }
   };
 
-  const getQuestions = async (lang_id, category) => {
+  const getQuestions = async (language, difficulty) => {
     try {
       const config = {
         headers: {
@@ -62,19 +66,19 @@ const TestPage = () => {
         },
       };
       const response = await axios.post(
-        "http://localhost:5000/quiz/questions",
+        "http://localhost:4000/quiz/questions",
         {
-          language_id: lang_id,
-          category: category,
+          language_id: language,
+          category: difficulty,
         },
         config
       );
-      if (lang_id && category) {
-        setQuestions(response.data);
-      }
+      setQuestions(response.data);
+      setLangId(language);
+      setCategory(difficulty);
+      setShouldShow(true);
     } catch (err) {
-      console.log("Error occurred in fetching questions from the database");
-      console.log(err);
+      console.error("Error occurred in fetching questions from the database", err);
     }
   };
 
@@ -83,22 +87,6 @@ const TestPage = () => {
   }, []);
 
   useEffect(() => {
-    // This will prevent the first render
-    if (initialRenderQuestions) {
-      setInitialRenderQuestions(false);
-      return;
-    }
-    if (lang_id !== "" && category !== "") {
-      getQuestions(lang_id, category);
-      setShouldShow(true);
-    } else {
-      setShouldShow(false);
-    }
-  }, [lang_id, category]);
-
-  // This part of code will fill "-1" as answer of every mcq questions whenever the questions are set
-  useEffect(() => {
-    // This will prevent the first render
     if (initialRenderAnswers) {
       setInitialRenderAnswers(false);
       return;
@@ -120,16 +108,15 @@ const TestPage = () => {
       [questionId]: selectedOption,
     });
   };
+
   const handleSubmit = async () => {
     try {
       const dataToSend = {
         uid: userInfo._id,
-        pairs: Object.entries(selectedAnswers).map(
-          ([objectId, givenAnswer]) => ({
-            objectId: objectId,
-            givenAnswer: givenAnswer,
-          })
-        ),
+        pairs: Object.entries(selectedAnswers).map(([objectId, givenAnswer]) => ({
+          objectId,
+          givenAnswer,
+        })),
       };
       const config = {
         headers: {
@@ -138,7 +125,7 @@ const TestPage = () => {
         },
       };
       const response = await axios.post(
-        "http://localhost:5000/quiz/answers",
+        "http://localhost:4000/quiz/answers",
         dataToSend,
         config
       );
@@ -155,10 +142,7 @@ const TestPage = () => {
       <Navbar />
       <Modal isOpen={isOpen} onClose={onClose} size="2xl" isCentered>
         <ModalOverlay />
-        <ModalContent
-          textAlign="center"
-          maxW={{ base: "95%", md: "lg", lg: "2xl" }}
-        >
+        <ModalContent textAlign="center" maxW={{ base: "95%", md: "lg", lg: "2xl" }}>
           <ModalHeader fontSize="3xl">Quiz Result</ModalHeader>
           <ModalCloseButton />
           <ModalBody fontSize="xl">
@@ -170,7 +154,7 @@ const TestPage = () => {
             <Text>Total Marks: {responseDetails.totalMarks}</Text>
             <Text>Your Score: {responseDetails.score}</Text>
             <Text>Accuracy: {responseDetails.accuracy}%</Text>
-            <Text>Negative Marking Per Each Question: -0.5(50%)</Text>
+            <Text>Negative Marking Per Each Question: -0.5 (50%)</Text>
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="green" mr={3} onClick={onClose}>
@@ -179,51 +163,46 @@ const TestPage = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Container maxW="xl" py={8} px={4} mt={12}>
-        <Text
-          textAlign="center"
-          fontSize={{ base: "2xl", md: "4xl" }}
-          fontWeight="bold"
-          color="white"
-          mt={3}
-          mb={5}
-        >
-          Fun Quiz
-        </Text>
-        <Select
-          placeholder="Select Language"
-          value={lang_id}
-          onChange={(e) => {
-            setLangId(e.target.value);
-          }}
-          background="white"
-          mb={5}
-          fontSize="xl"
-          textAlign="center"
-        >
-          {languages.map((language) => (
-            <option key={language} value={language}>
-              {language.toUpperCase()}
-            </option>
-          ))}
-        </Select>
-        <Select
-          id="difficulty"
-          background="white"
-          mb={5}
-          placeholder="Select Difficulty"
-          value={category}
-          fontSize="xl"
-          textAlign="center"
-          onChange={(e) => {
-            setCategory(e.target.value);
-          }}
-        >
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-        </Select>
-        {shouldShow ? (
+
+      <Container maxW="6xl" py={8} px={4} mt={12}>
+        {!shouldShow && (
+          <>
+            <Text
+              textAlign="center"
+              fontSize={{ base: "2xl", md: "4xl" }}
+              fontWeight="bold"
+              color="white"
+              mb={5}
+            >
+              Choose a Quiz to Begin
+            </Text>
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={6}>
+              {languages.map((lang) =>
+                difficulties.map((level) => (
+                  <Card
+                    key={`${lang}-${level}`}
+                    background="white"
+                    _hover={{ shadow: "md" }}
+                  >
+                    <CardBody textAlign="center">
+                      <Heading size="md">{lang.toUpperCase()}</Heading>
+                      <Text mt={2}>{level.toUpperCase()} Level</Text>
+                      <Button
+                        mt={4}
+                        colorScheme="blue"
+                        onClick={() => getQuestions(lang, level)}
+                      >
+                        Start Test
+                      </Button>
+                    </CardBody>
+                  </Card>
+                ))
+              )}
+            </SimpleGrid>
+          </>
+        )}
+
+        {shouldShow && (
           <VStack spacing={4}>
             <Text
               fontSize="2xl"
@@ -249,9 +228,7 @@ const TestPage = () => {
                   </Text>
                   <RadioGroup
                     value={selectedAnswers[question._id] || "-1"}
-                    onChange={(value) =>
-                      handleOptionSelect(question._id, value)
-                    }
+                    onChange={(value) => handleOptionSelect(question._id, value)}
                     display="flex"
                     flexDirection="column"
                   >
@@ -270,10 +247,6 @@ const TestPage = () => {
               </Center>
             </form>
           </VStack>
-        ) : (
-          <Text mt={5} fontSize="xl" color="white" textAlign="center">
-            Select a language and the difficulty level for the quiz
-          </Text>
         )}
       </Container>
     </>
