@@ -24,67 +24,81 @@ const Navbar = () => {
     width: "100%",
     zIndex: 1000,
   };
+
   const linkStyle = {
     textDecoration: "none",
   };
+
   const user = JSON.parse(localStorage.getItem("userInfo"));
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Flex align="center" bg="blue.500" p={4} color="white" style={navbarStyle}>
+      {/* Mobile Hamburger Icon */}
       <IconButton
         icon={<HamburgerIcon />}
         aria-label="Open Menu"
         display={{ base: "block", md: "none" }}
         onClick={onOpen}
+        bg="transparent"
+        _hover={{ bg: "blue.600" }}
       />
+
+      {/* Drawer Menu for Mobile */}
       <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
-        <DrawerOverlay>
-          <DrawerContent>
-            <DrawerHeader borderBottomWidth="1px">
-              {" "}
-              <IconButton
-                icon={<CloseIcon />} 
-                size="sm"
-                aria-label="Close"
-                onClick={onClose}
-                position="absolute"
-                top={2}
-                right={2}
-              />{" "}
-              Menu
-            </DrawerHeader>
-            <DrawerBody>
-              <Link href="/testpage" style={linkStyle}>
-                <Box display="flex" alignItems="center" mr={4} mb={4}>
-                  <Text>Give Test</Text>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerHeader borderBottomWidth="1px">
+            Menu
+            <IconButton
+              icon={<CloseIcon />}
+              size="sm"
+              aria-label="Close"
+              onClick={onClose}
+              position="absolute"
+              top={2}
+              right={2}
+            />
+          </DrawerHeader>
+          <DrawerBody>
+            <Link href="/testpage" style={linkStyle}>
+              <Box display="flex" alignItems="center" mb={4}>
+                <Text>Give Test</Text>
+              </Box>
+            </Link>
+            <Link href="/performance" style={linkStyle}>
+              <Box display="flex" alignItems="center" mb={4}>
+                <Text>Performance</Text>
+              </Box>
+            </Link>
+            <Link href="/uploadQuestion" style={linkStyle}>
+              <Box display="flex" alignItems="center" mb={4}>
+                <Text>Upload Question</Text>
+              </Box>
+            </Link>
+            <Link href="/leaderboard" style={linkStyle}>
+              <Box display="flex" alignItems="center" mb={4}>
+                <Text>Leaderboard</Text>
+              </Box>
+            </Link>
+            {user?.isTeacher && (
+              <Link href="/create-quiz" style={linkStyle}>
+                <Box display="flex" alignItems="center" mb={4}>
+                  <Text>Create Quiz</Text>
                 </Box>
               </Link>
-              <Link href="/performance" style={linkStyle}>
-                <Box display="flex" alignItems="center" mr={4} mb={4}>
-                  <Text>Performance</Text>
-                </Box>
-              </Link>
-              <Link href="/uploadQuestion" style={linkStyle}>
-                <Box display="flex" alignItems="center" mr={4} mb={4}>
-                  <Text>Upload Question</Text>
-                </Box>
-              </Link>
-              <Link href="/leaderboard" style={linkStyle}>
-                <Box display="flex" alignItems="center" mr={4} mb={4}>
-                  <Text>Leaderboard</Text>
-                </Box>
-              </Link>
-              <Link href="/profile" style={linkStyle}>
-                <Box display="flex" alignItems="center" mr={4} mb={4}>
-                  <Avatar size="sm" name={user.name} />
-                  <Text ml={2}>Profile</Text>
-                </Box>
-              </Link>
-            </DrawerBody>
-          </DrawerContent>
-        </DrawerOverlay>
+            )}
+            <Link href="/profile" style={linkStyle}>
+              <Box display="flex" alignItems="center" mb={4}>
+                <Avatar size="sm" name={user.name} />
+                <Text ml={2}>Profile</Text>
+              </Box>
+            </Link>
+          </DrawerBody>
+        </DrawerContent>
       </Drawer>
+
+      {/* Desktop Links */}
       <Link href="/testpage" style={linkStyle}>
         <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
           <Text>Give Test</Text>
@@ -105,7 +119,16 @@ const Navbar = () => {
           <Text>Upload Question</Text>
         </Box>
       </Link>
+      {user?.isTeacher && (
+        <Link href="/create-quiz" style={linkStyle}>
+          <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
+            <Text>Create Quiz</Text>
+          </Box>
+        </Link>
+      )}
+
       <Spacer />
+
       <Link href="/profile" style={linkStyle}>
         <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
           <Avatar size="sm" name={user.name} />

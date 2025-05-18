@@ -2,14 +2,20 @@ const mongoose = require("mongoose");
 
 const questionSchema = mongoose.Schema(
   {
-    language_id: { type: String, required: true },
-    category: { type: String, required: true },
-    desc: { type: String, required: true },
-    options: {
-      type: String,
+    quizId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Quiz",
       required: true,
     },
-    correct_answer: { type: String, required: true },
+    desc: { type: String, required: true },
+    options: {
+      type: [String], // array of 4 options
+      validate: [arr => arr.length === 4, 'Must have exactly 4 options'],
+    },
+    correct_answer: {
+      type: Number, // index of correct option (0-3)
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -1,6 +1,8 @@
 const expressAsyncHandler = require("express-async-handler");
 const History = require("../models/historyModel");
 const Proficiency = require("../models/proficiencyModel");
+const Quiz = require("../models/quizModel");
+const User = require("../models/userModel");
 
 const getPerformance = expressAsyncHandler(async (req, res) => {
   let uid = req.query.uid;
@@ -29,6 +31,29 @@ const getPerformance = expressAsyncHandler(async (req, res) => {
   }
 });
 
+const getAllHistory = expressAsyncHandler(async (req, res) => {
+  const uid = req.query.uid;
+
+  const history = await History.find({ user_id: uid })
+    .sort({ createdAt: -1 })
+    .populate("user_id", "name")
+    .populate("quiz_id", "name teacher createdAt")
+    .lean();
+
+  const formatted = await Promise.all(
+    history.map(async (entry) => {
+      const quiz = await Quiz.findById(entry.quiz_id).populate("teacher", "name");
+      return {
+        _id: entry._id,
+        quizName: quiz?.name || "Unknown Quiz",
+        teacherName: quiz?.teacher?.name || "Unknown Teacher",
+        attemptedAt: entry.createdAt,
+      };
+    })
+  );
+
+  res.status(200).json(formatted);
+});
 
 const getLeaderboard = expressAsyncHandler(async (req, res) => {
   let lang_id = req.query.lang_id;
@@ -80,4 +105,5 @@ module.exports = {
   getLeaderboard,
   getProficiency,
   deleteHistory,
+  getAllHistory,
 };
