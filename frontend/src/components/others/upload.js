@@ -1,15 +1,14 @@
 import {
   Box,
-  Container,
   FormControl,
   FormLabel,
   Input,
   Select,
   Text,
-  Divider,
   Button,
-  Center,
+  VStack,
   useToast,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import axios from "axios";
@@ -24,21 +23,25 @@ function UploadQuestion() {
   const [option3, setOption3] = useState("");
   const [option4, setOption4] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
+
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const toast = useToast();
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     const dataToSend = {
       uid: userInfo._id,
       lang_id: langId,
-      category: category,
-      desc: desc,
-      option1: option1,
-      option2: option2,
-      option3: option3,
-      option4: option4,
+      category,
+      desc,
+      option1,
+      option2,
+      option3,
+      option4,
       correct_answer: correctAnswer,
     };
+
     try {
       const config = {
         headers: {
@@ -46,163 +49,176 @@ function UploadQuestion() {
           Authorization: `Bearer ${userInfo.token}`,
         },
       };
-      const isSent = await axios.post(
-        "http://localhost:4000/quiz/upload",
-        dataToSend,
-        config
-      );
-      if (isSent) {
-        toast({
-          title: "Question Uploaded",
-          description: "Your question has been successfully uploaded.",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
+
+      await axios.post("http://localhost:4000/quiz/upload", dataToSend, config);
+
+      toast({
+        title: "Question Uploaded",
+        description: "Your question has been successfully uploaded.",
+        status: "success",
+        duration: 4000,
+        isClosable: true,
+      });
+
+      // Clear form fields
+      setLangId("");
+      setCategory("");
+      setDesc("");
+      setOption1("");
+      setOption2("");
+      setOption3("");
+      setOption4("");
+      setCorrectAnswer("");
     } catch (err) {
       console.error(err);
-      alert("Question uploading failed, please try again.");
+      toast({
+        title: "Upload Failed",
+        description: "Question uploading failed. Please try again.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
     }
   };
+
+  const formWidth = useBreakpointValue({ base: "100%", sm: "90%", md: "500px" });
+
   return (
     <>
       <Navbar />
-      <Container
-        background="white"
-        maxW={{ base: "95%", md: "lg", lg: "2xl" }}
-        py={8}
-        mt="5rem"
-        mb="2rem"
-        rounded="lg"
+      <Box
+        minH="100vh"
+        w="100%"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        bgGradient="linear(to-br, blue.100, blue.300)"
+        px={4}
+        pt="5rem" // ensures space for fixed navbar
       >
-        <Text
-          textAlign="center"
-          fontSize={{ base: "xl", md: "2xl", lg: "3xl" }}
-          fontWeight="bold"
-          color="#06cf60"
-          pb={6}
+        <Box
+          bg="white"
+          p={8}
+          borderRadius="xl"
+          boxShadow="2xl"
+          w={formWidth}
+          maxW="600px"
+          mx="auto"
         >
-          Add A Question
-        </Text>
-        <Divider />
-        <Box p={4} display="flex" justifyContent="center">
+          <Text
+            fontSize={{ base: "2xl", md: "3xl" }}
+            textAlign="center"
+            fontWeight="bold"
+            color="blue.600"
+            mb={6}
+          >
+            Add a New Question
+          </Text>
+
           <form onSubmit={handleSubmit}>
-            <FormControl id="lang_id" mb={4} isRequired>
-              <FormLabel>Language</FormLabel>
-              <Input
-                type="text"
-                placeholder="Enter Language"
-                value={langId}
-                onChange={(e) => {
-                  setLangId(e.target.value);
-                }}
-              />
-            </FormControl>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Language</FormLabel>
+                <Input
+                  placeholder="Enter language"
+                  value={langId}
+                  onChange={(e) => setLangId(e.target.value)}
+                  bg="gray.50"
+                />
+              </FormControl>
 
-            <FormControl id="description" mb={4} isRequired>
-              <FormLabel>Question</FormLabel>
-              <Input
-                type="text"
-                placeholder="Enter the Question Details"
-                value={desc}
-                onChange={(e) => {
-                  setDesc(e.target.value);
-                }}
-              />
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Question</FormLabel>
+                <Input
+                  placeholder="Enter the question"
+                  value={desc}
+                  onChange={(e) => setDesc(e.target.value)}
+                  bg="gray.50"
+                />
+              </FormControl>
 
-            <FormControl id="option1" mb={4} isRequired>
-              <FormLabel>Option 1</FormLabel>
-              <Input
-                type="text"
-                placeholder="Enter Option 1"
-                value={option1}
-                onChange={(e) => {
-                  setOption1(e.target.value);
-                }}
-              />
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Option 1</FormLabel>
+                <Input
+                  placeholder="Enter Option 1"
+                  value={option1}
+                  onChange={(e) => setOption1(e.target.value)}
+                  bg="gray.50"
+                />
+              </FormControl>
 
-            <FormControl id="option2" mb={4} isRequired>
-              <FormLabel>Option 2</FormLabel>
-              <Input
-                type="text"
-                placeholder="Enter Option 2"
-                value={option2}
-                onChange={(e) => {
-                  setOption2(e.target.value);
-                }}
-              />
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Option 2</FormLabel>
+                <Input
+                  placeholder="Enter Option 2"
+                  value={option2}
+                  onChange={(e) => setOption2(e.target.value)}
+                  bg="gray.50"
+                />
+              </FormControl>
 
-            <FormControl id="option3" mb={4} isRequired>
-              <FormLabel>Option 3</FormLabel>
-              <Input
-                type="text"
-                placeholder="Enter Option 3"
-                value={option3}
-                onChange={(e) => {
-                  setOption3(e.target.value);
-                }}
-              />
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Option 3</FormLabel>
+                <Input
+                  placeholder="Enter Option 3"
+                  value={option3}
+                  onChange={(e) => setOption3(e.target.value)}
+                  bg="gray.50"
+                />
+              </FormControl>
 
-            <FormControl id="option4" mb={4} isRequired>
-              <FormLabel>Option 4</FormLabel>
-              <Input
-                type="text"
-                placeholder="Enter Option 4"
-                value={option4}
-                onChange={(e) => {
-                  setOption4(e.target.value);
-                }}
-              />
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Option 4</FormLabel>
+                <Input
+                  placeholder="Enter Option 4"
+                  value={option4}
+                  onChange={(e) => setOption4(e.target.value)}
+                  bg="gray.50"
+                />
+              </FormControl>
 
-            <FormControl id="category" mb={4} isRequired>
-              <FormLabel>Category</FormLabel>
-              <Select
-                placeholder="Select Difficulty Level of the Question"
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                }}
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </Select>
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Category</FormLabel>
+                <Select
+                  placeholder="Select difficulty level"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  bg="gray.50"
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </Select>
+              </FormControl>
 
-            <FormControl id="correct_answer" mb={4} isRequired>
-              <FormLabel>Correct Answer</FormLabel>
-              <Select
-                placeholder="Select Correct Answer"
-                value={correctAnswer}
-                onChange={(e) => {
-                  setCorrectAnswer(e.target.value);
-                }}
-              >
-                <option value="0">Option 1</option>
-                <option value="1">Option 2</option>
-                <option value="2">Option 3</option>
-                <option value="3">Option 4</option>
-              </Select>
-            </FormControl>
-            <Center>
+              <FormControl isRequired>
+                <FormLabel>Correct Answer</FormLabel>
+                <Select
+                  placeholder="Select correct answer"
+                  value={correctAnswer}
+                  onChange={(e) => setCorrectAnswer(e.target.value)}
+                  bg="gray.50"
+                >
+                  <option value="0">Option 1</option>
+                  <option value="1">Option 2</option>
+                  <option value="2">Option 3</option>
+                  <option value="3">Option 4</option>
+                </Select>
+              </FormControl>
+
               <Button
                 type="submit"
                 colorScheme="blue"
-                style={{ marginTop: 17, marginBottom: 4 }}
-                padding={5}
+                size="lg"
+                width="100%"
+                mt={2}
               >
-                Add
+                Upload Question
               </Button>
-            </Center>
+            </VStack>
           </form>
         </Box>
-      </Container>
+      </Box>
     </>
   );
 }

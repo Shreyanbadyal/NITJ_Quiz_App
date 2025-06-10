@@ -1,3 +1,4 @@
+// Frontend Update: LeaderboardPage.js
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -8,137 +9,135 @@ import {
   Tr,
   Th,
   Td,
+  VStack,
+  Spinner,
+  Center,
   Select,
 } from "@chakra-ui/react";
 import axios from "axios";
-import Navbar from "./navbar";
+import Navbar from "../others/navbar";
 
 const LeaderboardPage = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
-  const [lang_id, setLangId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [quizzes, setQuizzes] = useState([]);
+  const [selectedQuizId, setSelectedQuizId] = useState("");
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  const [languages, setLanguages] = useState([]);
-  const [shouldShow, setShouldShow] = useState(false);
 
-  const fetchLanguages = async () => {
+  const fetchQuizzes = async () => {
     try {
       const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
+        headers: { Authorization: `Bearer ${userInfo.token}` },
       };
-      const response = await axios.get(
-        `http://localhost:4000/quiz/languages`,
-        config
-      );
-      setLanguages(response.data);
-    } catch (error) {
-      console.error("Error fetching language data:", error);
+      const res = await axios.get("http://localhost:4000/quiz/live", config);
+      setQuizzes(res.data);
+    } catch (err) {
+      console.error("Failed to fetch quizzes:", err);
+    }
+  };
+
+  const fetchLeaderboard = async () => {
+    try {
+      setLoading(true);
+      const config = {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
+      };
+      const url = selectedQuizId
+        ? `http://localhost:4000/performance/leaderboard?quiz_id=${selectedQuizId}`
+        : `http://localhost:4000/performance/leaderboard`;
+      const res = await axios.get(url, config);
+      setLeaderboardData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch leaderboard:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLanguages();
+    fetchQuizzes();
   }, []);
 
   useEffect(() => {
-    const getLeaderboard = async (selectedLangId) => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
-      try {
-        const response = await axios.get(
-          `http://localhost:4000/performance/leaderboard?lang_id=${selectedLangId}`,
-          config
-        );
-        setLeaderboardData(response.data);
-      } catch (err) {
-        console.log(
-          "Error occurred in fetching leaderboard data from the database " + err
-        );
-      }
-    };
-
-    getLeaderboard(lang_id);
-    if (lang_id !== "") {
-      setShouldShow(true);
-    } else {
-      setShouldShow(false);
-    }
-  }, [lang_id]);
+    fetchLeaderboard();
+  }, [selectedQuizId]);
 
   return (
     <>
       <Navbar />
       <Box
-        p={4}
-        borderWidth="1px"
-        borderRadius="md"
-        background="white"
-        textAlign="center"
-        mx="auto"
-        position="absolute"
-        top="0"
-        left="0"
-        width="100%"
-        height="100%"
+        minH="100vh"
+        w="100%"
+        bgGradient="linear(to-br, blue.100, blue.300)"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        px={4}
+        pt="5rem"
       >
-        {shouldShow ? (
-          <Text fontSize="xl" fontWeight="bold" mb={4} mt={12} pt={5}>
-            Leaderboard for {lang_id.toUpperCase()}
-          </Text>
-        ) : (
-          <>
-            <Text fontSize="xl" fontWeight="bold" mb={4} mt={12} pt={5}>
-              Leaderboard
-            </Text>
-          </>
-        )}
-        <Select
-          placeholder="Select Language"
-          value={lang_id}
-          onChange={(e) => {
-            setLangId(e.target.value);
-          }}
+        <Box
+          bg="white"
+          p={8}
+          borderRadius="xl"
+          boxShadow="2xl"
+          w={{ base: "100%", sm: "90%", md: "800px" }}
+          maxW="1000px"
         >
-          {languages.map((language) => (
-            <option key={language} value={language}>
-              {language.toUpperCase()}
-            </option>
-          ))}
-        </Select>
-        <Table variant="striped" colorScheme="teal">
-          <Thead>
-            <Tr>
-              <Th>Rank</Th>
-              <Th>Name</Th>
-              <Th>Email</Th>
-              <Th>Score</Th>
-            </Tr>
-          </Thead>
-          {leaderboardData.length > 0 ? (
-            <Tbody>
-              {leaderboardData.map((entry, index) => (
-                <Tr key={index}>
-                  <Td>{index + 1}</Td>
-                  <Td>{entry.uid.name}</Td>
-                  <Td>{entry.uid.email}</Td>
-                  <Td>{entry.score_percent}</Td>
-                </Tr>
+          <VStack spacing={5} mb={6}>
+            <Text fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold" color="blue.600">
+              Quiz Leaderboard
+            </Text>
+            <Select
+              placeholder="Select Quiz"
+              value={selectedQuizId}
+              onChange={(e) => setSelectedQuizId(e.target.value)}
+              bg="gray.50"
+              w="100%"
+              maxW="300px"
+            >
+              {quizzes.map((quiz) => (
+                <option key={quiz._id} value={quiz._id}>
+                  {quiz.name}
+                </option>
               ))}
-            </Tbody>
+            </Select>
+          </VStack>
+
+          {loading ? (
+            <Center py={8}>
+              <Spinner size="lg" color="blue.500" />
+            </Center>
+          ) : leaderboardData.length === 0 ? (
+            <Text textAlign="center" fontSize="md" color="gray.600">
+              No leaderboard data available.
+            </Text>
           ) : (
-            <Tbody>
-              <Tr>
-                <Td colSpan="4">No data available</Td>
-              </Tr>
-            </Tbody>
+            <Table variant="striped" colorScheme="blue" size="md">
+              <Thead>
+                <Tr>
+                  <Th>Rank</Th>
+                  <Th>Name</Th>
+                  <Th>Email</Th>
+                  <Th>Quiz</Th>
+                  <Th>Score (%)</Th>
+                  <Th>Attempts</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {leaderboardData.map((entry, index) => (
+                  <Tr key={index}>
+                    <Td>{index + 1}</Td>
+                    <Td>{entry.name}</Td>
+                    <Td>{entry.email}</Td>
+                    <Td>{entry.quizName}</Td>
+                    <Td>{entry.score_percent}</Td>
+                    <Td>{entry.attempts || "-"}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
           )}
-        </Table>
+        </Box>
       </Box>
     </>
   );

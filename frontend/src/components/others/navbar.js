@@ -13,42 +13,60 @@ import {
   DrawerHeader,
   DrawerBody,
   useDisclosure,
+  HStack,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 
 const Navbar = () => {
-  const navbarStyle = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    zIndex: 1000,
-  };
-
-  const linkStyle = {
-    textDecoration: "none",
-  };
-
   const user = JSON.parse(localStorage.getItem("userInfo"));
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const navItems = [
+    { label: "Give Test", href: "/testpage" },
+    { label: "Performance", href: "/performance" },
+    { label: "Leaderboard", href: "/leaderboard" },
+    { label: "Upload Question", href: "/uploadQuestion" },
+  ];
+
+  if (user?.isTeacher) {
+    navItems.push({ label: "Create Quiz", href: "/create-quiz" });
+  }
+
+  const linkStyle = {
+    textDecoration: "none",
+    fontWeight: "medium",
+  };
+
   return (
-    <Flex align="center" bg="blue.500" p={4} color="white" style={navbarStyle}>
-      {/* Mobile Hamburger Icon */}
+    <Flex
+      as="nav"
+      align="center"
+      bg="blue.600"
+      p={4}
+      color="white"
+      position="fixed"
+      top={0}
+      left={0}
+      width="100%"
+      zIndex={1000}
+      boxShadow="md"
+    >
+      {/* Mobile Menu Icon */}
       <IconButton
         icon={<HamburgerIcon />}
         aria-label="Open Menu"
         display={{ base: "block", md: "none" }}
         onClick={onOpen}
         bg="transparent"
-        _hover={{ bg: "blue.600" }}
+        _hover={{ bg: "blue.700" }}
+        mr={2}
       />
 
-      {/* Drawer Menu for Mobile */}
+      {/* Drawer for Mobile Navigation */}
       <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
         <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">
+          <DrawerHeader borderBottomWidth="1px" fontWeight="bold">
             Menu
             <IconButton
               icon={<CloseIcon />}
@@ -61,35 +79,15 @@ const Navbar = () => {
             />
           </DrawerHeader>
           <DrawerBody>
-            <Link href="/testpage" style={linkStyle}>
-              <Box display="flex" alignItems="center" mb={4}>
-                <Text>Give Test</Text>
-              </Box>
-            </Link>
-            <Link href="/performance" style={linkStyle}>
-              <Box display="flex" alignItems="center" mb={4}>
-                <Text>Performance</Text>
-              </Box>
-            </Link>
-            <Link href="/uploadQuestion" style={linkStyle}>
-              <Box display="flex" alignItems="center" mb={4}>
-                <Text>Upload Question</Text>
-              </Box>
-            </Link>
-            <Link href="/leaderboard" style={linkStyle}>
-              <Box display="flex" alignItems="center" mb={4}>
-                <Text>Leaderboard</Text>
-              </Box>
-            </Link>
-            {user?.isTeacher && (
-              <Link href="/create-quiz" style={linkStyle}>
-                <Box display="flex" alignItems="center" mb={4}>
-                  <Text>Create Quiz</Text>
+            {navItems.map((item) => (
+              <Link href={item.href} key={item.label} style={linkStyle}>
+                <Box mb={4}>
+                  <Text fontSize="md">{item.label}</Text>
                 </Box>
               </Link>
-            )}
+            ))}
             <Link href="/profile" style={linkStyle}>
-              <Box display="flex" alignItems="center" mb={4}>
+              <Box display="flex" alignItems="center" mt={6}>
                 <Avatar size="sm" name={user.name} />
                 <Text ml={2}>Profile</Text>
               </Box>
@@ -98,41 +96,30 @@ const Navbar = () => {
         </DrawerContent>
       </Drawer>
 
-      {/* Desktop Links */}
-      <Link href="/testpage" style={linkStyle}>
-        <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
-          <Text>Give Test</Text>
-        </Box>
-      </Link>
-      <Link href="/performance" style={linkStyle}>
-        <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
-          <Text>Performance</Text>
-        </Box>
-      </Link>
-      <Link href="/leaderboard" style={linkStyle}>
-        <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
-          <Text>Leaderboard</Text>
-        </Box>
-      </Link>
-      <Link href="/uploadQuestion" style={linkStyle}>
-        <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
-          <Text>Upload Question</Text>
-        </Box>
-      </Link>
-      {user?.isTeacher && (
-        <Link href="/create-quiz" style={linkStyle}>
-          <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
-            <Text>Create Quiz</Text>
-          </Box>
-        </Link>
-      )}
+      {/* Desktop Navigation */}
+      <HStack spacing={6} display={{ base: "none", md: "flex" }}>
+        {navItems.map((item) => (
+          <Link
+            href={item.href}
+            key={item.label}
+            _hover={{ textDecoration: "underline", color: "whiteAlpha.900" }}
+            fontWeight="medium"
+            fontSize="md"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </HStack>
 
       <Spacer />
 
+      {/* Profile Section */}
       <Link href="/profile" style={linkStyle}>
-        <Box display={{ base: "none", md: "flex" }} alignItems="center" mr={4}>
+        <Box display="flex" alignItems="center">
           <Avatar size="sm" name={user.name} />
-          <Text ml={2}>Profile</Text>
+          <Text ml={2} fontWeight="medium">
+            Profile
+          </Text>
         </Box>
       </Link>
     </Flex>

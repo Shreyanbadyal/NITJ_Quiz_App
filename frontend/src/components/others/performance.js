@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Button,
-  Container,
   Heading,
   Text,
   VStack,
@@ -16,17 +15,20 @@ import {
   Divider,
   Badge,
   HStack,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 import { DownloadIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import Navbar from "./navbar";
+import Navbar from "../others/navbar"; // Adjust path as needed
 
 const PerformanceGraph = () => {
   const [history, setHistory] = useState([]);
   const [selectedAttempt, setSelectedAttempt] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const toast = useToast();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const reportRef = useRef();
@@ -41,13 +43,16 @@ const PerformanceGraph = () => {
         config
       );
       setHistory(res.data);
+      setLoading(false);
     } catch {
       toast({
         title: "Error",
         description: "Could not fetch performance history.",
         status: "error",
         duration: 3000,
+        isClosable: true,
       });
+      setLoading(false);
     }
   };
 
@@ -68,6 +73,7 @@ const PerformanceGraph = () => {
         description: "Failed to load result.",
         status: "error",
         duration: 3000,
+        isClosable: true,
       });
     }
   };
@@ -89,42 +95,78 @@ const PerformanceGraph = () => {
   return (
     <>
       <Navbar />
-      <Container maxW="5xl" mt={24}>
-        <Heading size="lg" mb={6} textAlign="center">
-          Previous Quiz Attempts
-        </Heading>
+      <Box
+        minH="100vh"
+        w="100%"
+        bgGradient="linear(to-br, blue.100, blue.300)"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        px={4}
+        pt="5rem"
+      >
+        <Box
+          bg="white"
+          p={8}
+          borderRadius="xl"
+          boxShadow="2xl"
+          w={{ base: "100%", sm: "90%", md: "800px" }}
+          maxW="1000px"
+        >
+          <Heading
+            textAlign="center"
+            fontSize={{ base: "2xl", md: "3xl" }}
+            color="blue.600"
+            mb={6}
+          >
+            Previous Quiz Attempts
+          </Heading>
 
-        <VStack spacing={6}>
-          {history.map((attempt) => (
-            <Box
-              key={attempt._id}
-              p={5}
-              borderWidth="1px"
-              borderRadius="lg"
-              shadow="md"
-              width="100%"
-              bg="white"
-            >
-              <Text fontSize="xl" fontWeight="bold" color="blue.700">
-                {attempt.quizName}
+          {loading ? (
+            <Center py={8}>
+              <Spinner size="lg" color="blue.500" />
+            </Center>
+          ) : history.length === 0 ? (
+            <Center>
+              <Text fontSize="lg" color="gray.600">
+                No quiz attempts found.
               </Text>
-              <Text color="gray.600">Teacher: {attempt.teacherName}</Text>
-              <Text color="gray.500">
-                Attempted on: {new Date(attempt.attemptedAt).toLocaleString()}
-              </Text>
-              <Button
-                mt={3}
-                colorScheme="blue"
-                onClick={() => handleEvaluate(attempt._id)}
-              >
-                Evaluate Results
-              </Button>
-            </Box>
-          ))}
-        </VStack>
-      </Container>
+            </Center>
+          ) : (
+            <VStack spacing={6}>
+              {history.map((attempt) => (
+                <Box
+                  key={attempt._id}
+                  p={5}
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  shadow="sm"
+                  w="100%"
+                  bg="gray.50"
+                >
+                  <Text fontSize="xl" fontWeight="bold" color="blue.700">
+                    {attempt.quizName}
+                  </Text>
+                  <Text color="gray.600">Teacher: {attempt.teacherName}</Text>
+                  <Text color="gray.500">
+                    Attempted on:{" "}
+                    {new Date(attempt.attemptedAt).toLocaleString()}
+                  </Text>
+                  <Button
+                    mt={3}
+                    colorScheme="blue"
+                    onClick={() => handleEvaluate(attempt._id)}
+                  >
+                    Evaluate Results
+                  </Button>
+                </Box>
+              ))}
+            </VStack>
+          )}
+        </Box>
+      </Box>
 
-      {/* Modal */}
+      {/* Result Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -134,7 +176,7 @@ const PerformanceGraph = () => {
         <ModalOverlay />
         <ModalContent>
           <ModalHeader display="flex" justifyContent="space-between">
-            <Text>Quiz Results</Text>
+            <Text fontWeight="bold">Quiz Results</Text>
             <Button
               size="sm"
               leftIcon={<DownloadIcon />}
@@ -197,8 +239,8 @@ const PerformanceGraph = () => {
                               isCorrect
                                 ? "green.600"
                                 : isSelected
-                                ? "red.500"
-                                : "gray.700"
+                                  ? "red.500"
+                                  : "gray.700"
                             }
                           >
                             {i + 1}. {opt}

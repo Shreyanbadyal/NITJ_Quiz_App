@@ -10,7 +10,7 @@ import {
   TabPanels,
   Center,
   Stack,
-  Link,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import Login from "../components/authentication/Login";
 import Signup from "../components/authentication/Signup";
@@ -27,50 +27,72 @@ const Homepage = () => {
   }, [navigate]);
 
   return (
-    <Container maxW="xl" centerContent>
-      <Box
-        d="flex"
-        justifyContent="center"
-        p={3}
-        bg="white"
-        w="100%"
-        m="40px 0 15px 0"
-        borderRadius="lg"
-        borderWidth="1px"
-      >
-        <Text fontSize={{ base: "3xl", md: "4xl" }} fontFamily="Work sans">
-          <Center> NITJ QUIZ HUB</Center>
-        </Text>
-      </Box>
-      <Box bg="white" w="100%" p={4} borderRadius="lg" borderWidth="1px">
-        <Tabs variant="soft-rounded">
-          <TabList mb="1em">
-            <Tab width="50%">Login</Tab>
-            <Tab width="50%">Sign Up</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <Login />
-            </TabPanel>
-            <TabPanel>
-              <Signup />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Box>
-      <Container
-        as={Stack}
-        maxW={"6xl"}
-        mt={{ base: "10px", md: "50px" }}
-        py={4}
-        direction={{ base: "column", md: "row" }}
-        spacing={4}
-        justify={{ base: "center", md: "space-between" }}
-        align={{ base: "center", md: "center" }}
-      >
-        
+    <Box
+      minH="100vh"
+      bg={useColorModeValue("gray.100", "gray.900")}
+      py={10}
+      px={4}
+    >
+      <Container maxW="xl" centerContent>
+        <Box
+          textAlign="center"
+          p={4}
+          bg="white"
+          w="100%"
+          borderRadius="lg"
+          boxShadow="md"
+          mb={6}
+        >
+          <Text
+            fontSize={{ base: "3xl", md: "4xl" }}
+            fontWeight="bold"
+            fontFamily="Work Sans"
+            color="blue.600"
+          >
+            NITJ QUIZ HUB
+          </Text>
+          <Text fontSize="sm" color="gray.500" mt={1}>
+            Practice. Compete. Learn.
+          </Text>
+        </Box>
+
+        <Box
+          bg="white"
+          w="100%"
+          p={6}
+          borderRadius="lg"
+          boxShadow="xl"
+        >
+          <Tabs variant="soft-rounded" colorScheme="blue" isFitted>
+            <TabList mb={4}>
+              <Tab>Login</Tab>
+              <Tab>Sign Up</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <Login />
+              </TabPanel>
+              <TabPanel>
+                <Signup />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Box>
+
+        <Stack
+          direction="row"
+          mt={10}
+          spacing={4}
+          justify="center"
+          color="gray.500"
+          fontSize="sm"
+        >
+          <Text>© {new Date().getFullYear()} NITJ QUIZ HUB</Text>
+          <Text>|</Text>
+          <Text>Made with ❤️ by Team NITJ</Text>
+        </Stack>
       </Container>
-    </Container>
+    </Box>
   );
 };
 

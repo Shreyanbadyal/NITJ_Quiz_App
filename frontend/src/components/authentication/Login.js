@@ -1,16 +1,24 @@
 import React, { useState } from "react";
-import { FormControl, FormLabel } from "@chakra-ui/form-control";
-import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
-import { VStack } from "@chakra-ui/layout";
-import { Button } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  InputGroup,
+  InputRightElement,
+  VStack,
+  useToast,
+  Heading,
+  Text,
+} from "@chakra-ui/react";
 import axios from "axios";
-import { useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [show, setShow] = useState(false);
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const toast = useToast();
@@ -53,15 +61,14 @@ const Login = () => {
         position: "bottom",
       });
 
-      localStorage.setItem("userInfo", JSON.stringify(data)); //here we are storing the userInfo to the localstorage to use this in future
-
+      localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
-      navigate("/main", { replace: "true" });
+      navigate("/main", { replace: true });
       window.location.reload();
     } catch (error) {
       toast({
         title: "Error Occurred",
-        description: error.response.data.message,
+        description: error.response?.data?.message || "Login failed",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -72,47 +79,59 @@ const Login = () => {
   };
 
   return (
-    <VStack spacing="5px">
-      <FormControl id="email_1" isRequired>
-        <FormLabel>Email</FormLabel>
-        <Input
-          placeholder="Enter Your Email"
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
-          autoComplete="off"
-        />
-      </FormControl>
-      <FormControl id="password_1" isRequired>
-        <FormLabel>Password</FormLabel>
-        <InputGroup>
+    <Box
+      maxW="md"
+      mx="auto"
+      mt={16}
+      p={8}
+      borderRadius="xl"
+      boxShadow="lg"
+      bg="white"
+    >
+      <Heading mb={6} textAlign="center" fontSize="2xl" color="blue.600">
+        Welcome Back
+      </Heading>
+
+      <VStack spacing={5}>
+        <FormControl id="email_1" isRequired>
+          <FormLabel>Email</FormLabel>
           <Input
-            type={show ? "text" : "password"}
-            placeholder="Enter Your Password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
+            placeholder="Enter Your Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             autoComplete="off"
           />
-          <InputRightElement width="4.5rem">
-            <Button h="1.75rem" size="sm" onClick={handleClick}>
-              {show ? "Hide" : "Show"}
-            </Button>
-          </InputRightElement>
-        </InputGroup>
-      </FormControl>
-      <Button
-        colorScheme="blue"
-        width="100%"
-        style={{ marginTop: 17, marginBottom: 4 }}
-        onClick={submitHandler}
-        isLoading={loading}
-      >
-        Login
-      </Button>
-    </VStack>
+        </FormControl>
+
+        <FormControl id="password_1" isRequired>
+          <FormLabel>Password</FormLabel>
+          <InputGroup>
+            <Input
+              type={show ? "text" : "password"}
+              placeholder="Enter Your Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="off"
+            />
+            <InputRightElement width="4.5rem">
+              <Button h="1.75rem" size="sm" onClick={handleClick}>
+                {show ? "Hide" : "Show"}
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+        </FormControl>
+
+        <Button
+          colorScheme="blue"
+          width="100%"
+          mt={4}
+          onClick={submitHandler}
+          isLoading={loading}
+        >
+          Login
+        </Button>
+      </VStack>
+    </Box>
   );
 };
 

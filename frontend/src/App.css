@@ -40,7 +40,8 @@
 .App {
   min-height: 100vh;
   display: flex;
-  background-image: url("./background.jpg");
+  background-color: black;
+  /* background-image: url("./background.jpg"); */
   background-size: cover;
   background-position: center;
   font-family: Arial, Helvetica, sans-serif;

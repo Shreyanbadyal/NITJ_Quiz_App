@@ -13,6 +13,9 @@ import {
   Td,
   Spinner,
   useToast,
+  Text,
+  Center,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
@@ -45,6 +48,7 @@ const GiveTestPage = () => {
           duration: 3000,
           isClosable: true,
         });
+        setLoading(false);
       }
     };
 
@@ -56,47 +60,78 @@ const GiveTestPage = () => {
   };
 
   return (
-    <Container maxW="5xl" mt={20}>
-      <Heading mb={6} textAlign="center">
-        Available Quizzes
-      </Heading>
+    <Box
+      minH="100vh"
+      w="100%"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bgGradient="linear(to-br, blue.100, blue.300)"
+      px={4}
+      py={20}
+    >
+      <Box
+        bg="white"
+        p={8}
+        borderRadius="xl"
+        boxShadow="2xl"
+        w={{ base: "100%", sm: "90%", md: "800px" }}
+        maxW="900px"
+      >
+        <Heading
+          mb={6}
+          textAlign="center"
+          fontSize={{ base: "2xl", md: "3xl" }}
+          color="blue.600"
+        >
+          Available Quizzes
+        </Heading>
 
-      {loading ? (
-        <Spinner size="xl" />
-      ) : quizzes.length === 0 ? (
-        <Box textAlign="center">No quizzes available right now.</Box>
-      ) : (
-        <Table variant="simple" size="md">
-          <Thead>
-            <Tr>
-              <Th>Quiz Name</Th>
-              <Th>Duration</Th>
-              <Th>Teacher</Th>
-              <Th>Action</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {quizzes.map((quiz) => (
-              <Tr key={quiz._id}>
-                <Td>{quiz.name}</Td>
-                <Td>{quiz.duration} min</Td>
-                <Td>{quiz.teacher?.name || "Unknown"}</Td>
-                <Td>
-                  <Button
-                    size="sm"
-                    colorScheme="blue"
-                    onClick={() => handleAttempt(quiz._id)}
-                  >
-                    Attempt Test
-                  </Button>
-                </Td>
+        {loading ? (
+          <Center py={10}>
+            <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+          </Center>
+        ) : quizzes.length === 0 ? (
+          <Center>
+            <Text fontSize="lg" color="gray.600">
+              No quizzes available right now.
+            </Text>
+          </Center>
+        ) : (
+          <Table variant="striped" colorScheme="blue" size="md">
+            <Thead>
+              <Tr>
+                <Th>Quiz Name</Th>
+                <Th>Duration</Th>
+                <Th>Teacher</Th>
+                <Th textAlign="center">Action</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
-    </Container>
+            </Thead>
+            <Tbody>
+              {quizzes.map((quiz) => (
+                <Tr key={quiz._id}>
+                  <Td fontWeight="medium">{quiz.name}</Td>
+                  <Td>{quiz.duration} min</Td>
+                  <Td>{quiz.teacher?.name || "Unknown"}</Td>
+                  <Td textAlign="center">
+                    <Button
+                      size="sm"
+                      colorScheme="blue"
+                      onClick={() => handleAttempt(quiz._id)}
+                      variant="solid"
+                    >
+                      Attempt Test
+                    </Button>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        )}
+      </Box>
+    </Box>
   );
 };
 
 export default GiveTestPage;
+

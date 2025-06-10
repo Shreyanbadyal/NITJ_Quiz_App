@@ -8,7 +8,8 @@ import {
   useToast,
   FormControl,
   FormLabel,
-  Container,
+  Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -57,9 +58,7 @@ const CreateQuiz = () => {
         isClosable: true,
       });
 
-      // ✅ Redirect to add questions page with quiz ID
       navigate(`/add-question/${res.data._id}`);
-
       setName("");
       setDuration("");
     } catch (err) {
@@ -75,37 +74,71 @@ const CreateQuiz = () => {
   };
 
   return (
-    <Container maxW="md" mt={20} p={6} bg="whiteAlpha.800" borderRadius="lg" boxShadow="lg">
-      <Heading mb={6} textAlign="center">
-        Create a New Quiz
-      </Heading>
-      <form onSubmit={handleSubmit}>
-        <VStack spacing={4}>
-          <FormControl isRequired>
-            <FormLabel>Quiz Name</FormLabel>
-            <Input
-              placeholder="Enter quiz name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </FormControl>
+    <Box
+      minH="100vh"
+      w="100%"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bgGradient="linear(to-br, blue.100, blue.300)"
+      px={4}
+    >
+      <Box
+        bg="white"
+        p={8}
+        borderRadius="xl"
+        boxShadow="2xl"
+        w={{ base: "100%", sm: "400px", md: "450px" }}
+      >
+        <Heading
+          mb={2}
+          textAlign="center"
+          fontSize="2xl"
+          color="blue.600"
+        >
+          Create a New Quiz
+        </Heading>
+        <Text textAlign="center" mb={6} color="gray.500">
+          Enter the quiz name and duration to get started.
+        </Text>
 
-          <FormControl isRequired>
-            <FormLabel>Duration (minutes)</FormLabel>
-            <Input
-              type="number"
-              placeholder="Enter duration"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-            />
-          </FormControl>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={4}>
+            <FormControl isRequired>
+              <FormLabel fontWeight="semibold">Quiz Name</FormLabel>
+              <Input
+                placeholder="Enter quiz name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                bg="gray.50"
+              />
+            </FormControl>
 
-          <Button type="submit" colorScheme="blue" width="full">
-            Create Quiz
-          </Button>
-        </VStack>
-      </form>
-    </Container>
+            <FormControl isRequired>
+              <FormLabel fontWeight="semibold">Duration (minutes)</FormLabel>
+              <Input
+                type="number"
+                placeholder="Enter duration"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                bg="gray.50"
+              />
+            </FormControl>
+
+            <Button
+              type="submit"
+              colorScheme="blue"
+              size="lg"
+              width="full"
+              borderRadius="md"
+              _hover={{ bg: "blue.600" }}
+            >
+              Create Quiz
+            </Button>
+          </VStack>
+        </form>
+      </Box>
+    </Box>
   );
 };
 
